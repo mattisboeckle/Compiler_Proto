@@ -1,0 +1,16 @@
+printi(1.5 < 2.5);
+printi(3.9 < 2.6);
+
+printi(3.1 > 4.2);
+printi(3.3 > 2.4);
+
+printi(3.5 <= 4.6);
+printi(2.7 <= 2.7);
+printi(2.8 <= 1.9);
+
+printi(3.0 >= 4.1);
+printi(2.2 >= 2.2);
+printi(2.3 >= 1.4);
+
+printi(3.5 == 3.5);
+printi(3.6 != 3.6);

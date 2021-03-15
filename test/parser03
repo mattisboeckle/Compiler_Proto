@@ -1,0 +1,8 @@
+a : int = 3;
+b : int = 5;
+
+printi(a);
+printi(b);
+printi(a+b);
+printi(a*b);
+printi(5+3);

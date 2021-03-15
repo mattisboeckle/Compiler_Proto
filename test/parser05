@@ -1,0 +1,15 @@
+int :: test() { return 0; }
+
+int :: test2(n : int) {
+    return n*n;
+}
+
+int :: mul(n1 : int, n2 : int) {
+    return n1*n2;
+}
+
+printi(mul(12,2));
+printi(mul(12,3));
+printi(test2(3));
+printi(mul(12,2)+2*mul(12,3));
+printi(2+3*3);

@@ -1,0 +1,16 @@
+printi(3 < 4);
+printi(3 < 2);
+
+printi(3 > 4);
+printi(3 > 2);
+
+printi(3 <= 4);
+printi(2 <= 2);
+printi(2 <= 1);
+
+printi(3 >= 4);
+printi(2 >= 2);
+printi(2 >= 1);
+
+printi(3 == 3);
+printi(3 != 3);

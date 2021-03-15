@@ -1,0 +1,6 @@
+a : double = 3.0;
+b : double = 1.5;
+c : double = a*b;
+printd(a);
+printd(b);
+printd(c);

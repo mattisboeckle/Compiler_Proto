@@ -1,0 +1,37 @@
+[x] bools
+[x] comparisons
+  [ ] if, else
+  [ ] for
+  [ ] while
+
+[ ] unary/binary intrensic
+  [x] comparisons
+  [ ] allow -(int)/(double) in code
+  [ ] logic "gates"
+  [ ] bit operators (shifting)
+
+[ ] types
+  [x] boolean
+  [x] int
+  [x] double
+  [ ] chars
+  [ ] structs
+  [ ] arrays
+    [ ] strings
+
+[ ] print for everything
+
+[ ] type-checking / conversion
+  [x] fix doubles (calculations)
+  [x] check identifier for type in the right position
+  [x] type-checking on assignments
+  [x] auto value correction
+  [x] correct type conversion in function call
+  [ ] convert on function call (print?)
+  [ ] auto type assignment
+
+[ ] JIT
+  [x] run optimizer passes
+  [ ] add debugging levels
+  [ ] add better debugging (DWARF)
+
