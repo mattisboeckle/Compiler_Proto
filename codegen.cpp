@@ -7,8 +7,6 @@
 using namespace std;
 using namespace llvm;
 
-// STATUS: pretty good
-
 ExitOnError ExitOnErr;
 bool DEBUG = true;
 extern int Line;
@@ -248,12 +246,9 @@ Value* NAssignment::codeGen(CodeGenContext& context)
         Builder->CreateUIToFP(expr_val, Type::getDoubleTy(*myContext));
     }
 
-    //Skipping Arrays (strings) for now
-
     return Builder->CreateStore(expr_val, context.locals()[lhs.name], false);
 }
 
-// TODO: Refactor
 Value* NBlock::codeGen(CodeGenContext& context)
 {
     StatementList::const_iterator it;
@@ -265,7 +260,6 @@ Value* NBlock::codeGen(CodeGenContext& context)
     return last;
 }
 
-// TODO: Refactor
 Value* NExpressionStatement::codeGen(CodeGenContext& context)
 {
     if(DEBUG) std::cout << "Generating code for " << typeid(expression).name() << std::endl;

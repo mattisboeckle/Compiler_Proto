@@ -45,15 +45,6 @@ public:
     virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
-/*
-class NString : public NExpression {
-public:
-    const std::string value;
-    NString(const std::string value) : value(value) { }
-    virtual llvm::ConstantDataArray* codeGen(CodeGenContext& context);
-};
-*/
-
 class NBoolean : public NExpression {
 public:
 	bool value;
