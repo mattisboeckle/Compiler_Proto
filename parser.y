@@ -38,7 +38,7 @@
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl ifstmt
+%type <stmt> stmt var_decl func_decl ifstmt ifelsestmt
 %type <token> comparison
 
 /* Operator precedence for mathematical operators */
@@ -62,6 +62,7 @@ stmt : func_decl
      | var_decl SEMICOLON
      | expr SEMICOLON { $$ = new NExpressionStatement(*$<stmt>1); }
      | RETURN expr SEMICOLON { $$ = new NReturnStatement(*$2);}
+     | ifelsestmt
      | ifstmt
      ;
 
@@ -104,11 +105,14 @@ expr : ident EQUAL expr { $$ = new NAssignment(*$<ident>1, *$3); }
      | LPAREN expr RPAREN { $$ = $2; }
      ;
 
-ifstmt : IF expr stmt ELSE stmt     { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
-       //| IF expr expr               { $$ = new NIfStatement(*$2, *$3, nullptr); }
-       //| IF expr block              { $$ = new NIfStatement(*$2, *$3, nullptr); }
-       | IF expr block ELSE stmt    { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
-       | IF expr block ELSE block   { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
+ifelsestmt : IF expr stmt ELSE stmt       { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3), new NExpressionStatement(*$5)); }
+           | IF expr block ELSE stmt      { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3), new NExpressionStatement(*$5)); }
+           | IF expr block ELSE block     { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3), new NExpressionStatement(*$5)); }
+           | IF expr stmt ELSE  block     { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3), new NExpressionStatement(*$5)); }
+           | IF expr block ELSE stmt      { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3), new NExpressionStatement(*$5)); }
+
+ifstmt : IF expr stmt   { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3)); }
+       | IF expr block  { $$ = new NIfStatement(*$2, new NExpressionStatement(*$3)); }
        ;
 
 call_args : /*blank*/ { $$ = new ExpressionList(); }
