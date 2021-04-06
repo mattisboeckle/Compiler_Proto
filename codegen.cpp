@@ -287,7 +287,7 @@ Value* NIfStatement::codeGen(CodeGenContext& context) {
 
     Builder->SetInsertPoint(ThenBB);
 
-    Value *ThenV = then.codeGen(context);
+    Value *ThenV = then->codeGen(context);
     if (!ThenV)
         return nullptr;
 
@@ -297,9 +297,12 @@ Value* NIfStatement::codeGen(CodeGenContext& context) {
     TheFunction->getBasicBlockList().push_back(ElseBB);
     Builder->SetInsertPoint(ElseBB);
 
-    Value *ElseV = other.codeGen(context);
-    if (!ElseV)
-        return nullptr;
+    Value *ElseV;
+    if(other) {
+        ElseV = other->codeGen(context);
+        if (!ElseV)
+            return nullptr;
+    }
 
     Builder->CreateBr(MergeBB);
     ElseBB = Builder->GetInsertBlock();
@@ -307,15 +310,20 @@ Value* NIfStatement::codeGen(CodeGenContext& context) {
     TheFunction->getBasicBlockList().push_back(MergeBB);
     Builder->SetInsertPoint(MergeBB);
 
-    if(ElseV->getType() != ThenV->getType()) {
-        fprintf(stderr, "Can not create if statement with two mismatching types! | Line %d", Line);
-        return nullptr;
+    if(other) {
+        if(ElseV->getType() != ThenV->getType()) {
+            fprintf(stderr, "Can not create if statement with two mismatching types! | Line %d\n", Line);
+            return nullptr;
+        }
     }
 
-    PHINode *PN = Builder->CreatePHI(Builder->getVoidTy(), 2, "iftmp");
+    PHINode *PN = Builder->CreatePHI(ThenV->getType(), 2, "iftmp");
 
     PN->addIncoming(ThenV, ThenBB);
-    PN->addIncoming(ElseV, ElseBB);
+    if(other) {
+        PN->addIncoming(ElseV, ElseBB);
+    }
+    
     return PN;
 }
 
@@ -327,11 +335,9 @@ Value* NVariableDeclaration::codeGen(CodeGenContext& context)
     AllocaInst *alloc = Builder->CreateAlloca(l_type, nullptr, id.name.c_str());
 	context.locals()[id.name] = alloc;
 	if (assignmentExpr != NULL) {
-        printf("Not null");
 		NAssignment assn(id, *assignmentExpr);
 		Value* expr_val = assn.codeGen(context);
 	}else {
-        printf("Null");
         Builder->CreateStore(Constant::getNullValue(l_type), context.locals()[id.name], false);
     }
 	return alloc;

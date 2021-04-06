@@ -31,7 +31,7 @@ parser: $(OBJS)
 proto: parser
 	sudo cp parser /usr/local/bin/proto
 
-test: parser test/parser01 test/parser02 test/parser03 test/parser04 test/parser05 test/parser06 test/parser07 test/parser08
+test: parser test/parser01 test/parser02 test/parser03 test/parser04 test/parser05 test/parser06 test/parser07 test/parser08 test/parser09
 		./parser test/parser01
 		./parser test/parser02
 		./parser test/parser03
@@ -40,3 +40,4 @@ test: parser test/parser01 test/parser02 test/parser03 test/parser04 test/parser
 		./parser test/parser06
 		./parser test/parser07
 		./parser test/parser08
+		./parser test/parser09

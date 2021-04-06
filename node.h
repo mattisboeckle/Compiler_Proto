@@ -107,6 +107,10 @@ public:
 		block.statements.push_back(&stmt); 
 	}
 
+	NExpressionStatement() {
+		block = NBlock();
+	}
+
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
@@ -121,10 +125,13 @@ public:
 class NIfStatement : public NStatement {
 public:
 	NExpression& cond;
-	NExpressionStatement& then;
-	NExpressionStatement& other;
-	NIfStatement(NExpression& cond, NExpressionStatement& then, NExpressionStatement& other) :
+	NExpressionStatement* then;
+	NExpressionStatement* other;
+	NIfStatement(NExpression& cond, NExpressionStatement* then, NExpressionStatement* other) :
 		cond(cond), then(then), other(other) {}
+
+	NIfStatement(NExpression& cond, NExpressionStatement* then) :
+		cond(cond), then(then), other(NULL) {}
 
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
