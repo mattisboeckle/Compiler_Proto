@@ -31,14 +31,14 @@
 %token <token> CEQ CNE CLT CLE CGT CGE EQUAL
 %token <token> LPAREN RPAREN LBRACE RBRACE COMMA DOT COLON DOUBLE_COLON SEMICOLON
 %token <token> PLUS MINUS MUL DIV
-%token <token> RETURN PRINT
+%token <token> RETURN IF ELSE
 
 %type <ident> ident type
 %type <expr> numeric expr
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl
+%type <stmt> stmt var_decl func_decl ifstmt
 %type <token> comparison
 
 /* Operator precedence for mathematical operators */
@@ -60,8 +60,9 @@ stmts : stmt { $$ = new NBlock(); $$->statements.push_back($<stmt>1);}
 
 stmt : func_decl 
      | var_decl SEMICOLON
-     | expr SEMICOLON { $$ = new NExpressionStatement(*$1); }
+     | expr SEMICOLON { $$ = new NExpressionStatement(*$<stmt>1); }
      | RETURN expr SEMICOLON { $$ = new NReturnStatement(*$2);}
+     | ifstmt
      ;
 
 block : LBRACE stmts RBRACE { $$ = $2; }
@@ -102,6 +103,13 @@ expr : ident EQUAL expr { $$ = new NAssignment(*$<ident>1, *$3); }
      | expr comparison expr { $$ = new NBinaryOperator(*$1, $2, *$3); }
      | LPAREN expr RPAREN { $$ = $2; }
      ;
+
+ifstmt : IF expr stmt ELSE stmt     { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
+       //| IF expr expr               { $$ = new NIfStatement(*$2, *$3, nullptr); }
+       //| IF expr block              { $$ = new NIfStatement(*$2, *$3, nullptr); }
+       | IF expr block ELSE stmt    { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
+       | IF expr block ELSE block   { $$ = new NIfStatement(*$2, *(new NExpressionStatement(*$3)), *(new NExpressionStatement(*$5))); }
+       ;
 
 call_args : /*blank*/ { $$ = new ExpressionList(); }
           | expr { $$ = new ExpressionList(); $$->push_back($1); }

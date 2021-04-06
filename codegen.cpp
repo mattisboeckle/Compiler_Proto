@@ -8,7 +8,7 @@ using namespace std;
 using namespace llvm;
 
 ExitOnError ExitOnErr;
-bool DEBUG = true;
+bool DEBUG = false;
 extern int Line;
 
 //Adds functions into the llvm code
@@ -21,23 +21,20 @@ static void createCoreFns() {
     //Print double
     std::vector<llvm::Type*> printd_arg_types;
     printd_arg_types.push_back(Builder->getDoubleTy());
-    llvm::FunctionType* printd_type = llvm::FunctionType::get(Builder->getInt32Ty(), printd_arg_types, true);
+    llvm::FunctionType* printd_type = llvm::FunctionType::get(Builder->getVoidTy(), printd_arg_types, true);
     Function *printdfn = llvm::Function::Create(printd_type, llvm::Function::ExternalLinkage,"printd",*TheModule);
-    verifyFunction(*printdfn, &llvm::errs());
 
     //Print int
     std::vector<llvm::Type*> printi_arg_types;
     printi_arg_types.push_back(Builder->getInt64Ty());
-    llvm::FunctionType* printi_type = llvm::FunctionType::get(Builder->getInt32Ty(), printi_arg_types, true);
+    llvm::FunctionType* printi_type = llvm::FunctionType::get(Builder->getVoidTy(), printi_arg_types, true);
     Function *printifn = llvm::Function::Create(printi_type, llvm::Function::ExternalLinkage,"printi",*TheModule);
-    verifyFunction(*printifn, &llvm::errs());
 
     //printf
     std::vector<llvm::Type*> print_arg_types;
     print_arg_types.push_back(Builder->getInt8PtrTy());
-    llvm::FunctionType* print_type = llvm::FunctionType::get(Builder->getInt32Ty(), print_arg_types, true);
+    llvm::FunctionType* print_type = llvm::FunctionType::get(Builder->getVoidTy(), print_arg_types, true);
     Function *printfn = llvm::Function::Create(print_type, llvm::Function::ExternalLinkage,"print",*TheModule);
-    verifyFunction(*printfn, &llvm::errs());
 }
 
 /* Compile the AST into a module */
@@ -130,7 +127,6 @@ Value* NDouble::codeGen(CodeGenContext& context)
 
 Value* NBoolean::codeGen(CodeGenContext& context) 
 {
-    printf("Doing something stupid");
     return ConstantInt::get(Builder->getInt1Ty(), (int)value);
 }
 
@@ -262,8 +258,7 @@ Value* NBlock::codeGen(CodeGenContext& context)
 
 Value* NExpressionStatement::codeGen(CodeGenContext& context)
 {
-    if(DEBUG) std::cout << "Generating code for " << typeid(expression).name() << std::endl;
-    return expression.codeGen(context);
+    return block.codeGen(context);
 }
 
 Value* NReturnStatement::codeGen(CodeGenContext& context) {
@@ -271,6 +266,57 @@ Value* NReturnStatement::codeGen(CodeGenContext& context) {
     Value *returnValue = expression.codeGen(context);
     context.setCurrentReturnValue(returnValue);
     return returnValue;
+}
+
+Value* NIfStatement::codeGen(CodeGenContext& context) {
+    if(DEBUG) printf("Generating if statement\n");
+    Value *condV = cond.codeGen(context);
+    if(!condV)
+        return nullptr;
+    
+    condV = Builder->CreateUIToFP(condV, Builder->getDoubleTy());
+    condV = Builder->CreateFCmpONE(condV, ConstantFP::get(*myContext, APFloat(0.0)), "ifcond");
+
+    Function *TheFunction = Builder->GetInsertBlock()->getParent();
+
+    BasicBlock *ThenBB = BasicBlock::Create(*myContext, "then", TheFunction);
+    BasicBlock *ElseBB = BasicBlock::Create(*myContext, "else");
+    BasicBlock *MergeBB = BasicBlock::Create(*myContext, "ifcont");
+
+    Builder->CreateCondBr(condV, ThenBB, ElseBB);
+
+    Builder->SetInsertPoint(ThenBB);
+
+    Value *ThenV = then.codeGen(context);
+    if (!ThenV)
+        return nullptr;
+
+    Builder->CreateBr(MergeBB);
+    ThenBB = Builder->GetInsertBlock();
+
+    TheFunction->getBasicBlockList().push_back(ElseBB);
+    Builder->SetInsertPoint(ElseBB);
+
+    Value *ElseV = other.codeGen(context);
+    if (!ElseV)
+        return nullptr;
+
+    Builder->CreateBr(MergeBB);
+    ElseBB = Builder->GetInsertBlock();
+
+    TheFunction->getBasicBlockList().push_back(MergeBB);
+    Builder->SetInsertPoint(MergeBB);
+
+    if(ElseV->getType() != ThenV->getType()) {
+        fprintf(stderr, "Can not create if statement with two mismatching types! | Line %d", Line);
+        return nullptr;
+    }
+
+    PHINode *PN = Builder->CreatePHI(Builder->getVoidTy(), 2, "iftmp");
+
+    PN->addIncoming(ThenV, ThenBB);
+    PN->addIncoming(ElseV, ElseBB);
+    return PN;
 }
 
 Value* NVariableDeclaration::codeGen(CodeGenContext& context)

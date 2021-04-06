@@ -96,7 +96,7 @@ private:
       for (auto &F : M)
         FPM->run(F);
     });
-    verifyModule(*TSM.getModuleUnlocked(), &llvm::errs());
+    if(DEBUG) verifyModule(*TSM.getModuleUnlocked(), &llvm::errs());
     if(DEBUG) TSM.getModuleUnlocked()->print(errs(), nullptr);
     return std::move(TSM);
   }

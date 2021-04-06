@@ -19,6 +19,14 @@
   [ ] arrays
     [ ] strings
 
+[ ] parser
+  [ ] allow for empty part expressions (if)
+  [ ] fix shift/reduce conflicts
+
+[ ] Comments
+  [ ] Line Comment
+  [ ] Multi-Line Comment
+
 [ ] print for everything
 
 [ ] type-checking / conversion

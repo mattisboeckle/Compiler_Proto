@@ -98,9 +98,15 @@ public:
 
 class NExpressionStatement : public NStatement {
 public:
-	NExpression& expression;
-	NExpressionStatement(NExpression& expression) : 
-		expression(expression) { }
+	NBlock block;
+	NExpressionStatement(NBlock& block) : 
+		block(block) { }
+
+	NExpressionStatement(NStatement& stmt) { 
+		block = NBlock();
+		block.statements.push_back(&stmt); 
+	}
+
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
@@ -109,6 +115,17 @@ public:
 	NExpression& expression;
 	NReturnStatement(NExpression& expression) : 
 		expression(expression) { }
+	virtual llvm::Value* codeGen(CodeGenContext& context);
+};
+
+class NIfStatement : public NStatement {
+public:
+	NExpression& cond;
+	NExpressionStatement& then;
+	NExpressionStatement& other;
+	NIfStatement(NExpression& cond, NExpressionStatement& then, NExpressionStatement& other) :
+		cond(cond), then(then), other(other) {}
+
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
